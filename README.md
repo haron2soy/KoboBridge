@@ -1,73 +1,51 @@
 # KoboBridge
 
-KoboBridge is a utility to help you connect, synchronize, or manage your Kobo eReader with your computer or external services. It aims to simplify the process of managing your e-books, notes, and reading data by providing a bridge between your Kobo device and other platforms or tools.
+KoboBridge is a Flask-based application designed to integrate data collected from the KoboToolbox platform with external event streaming services (such as Azure Event Hubs), enabling real-time forwarding and monitoring of survey submissions. The application also provides user authentication, system health monitoring, and configuration management.
 
-## Features
+## Key Features
 
-- **Sync e-books:** Easily transfer e-books between your computer and your Kobo device.
-- **Export/Import notes:** Backup and restore your reading notes and highlights.
-- **Library management:** Organize and manage your Kobo library from your desktop.
-- **Plugin-friendly:** Extend functionality with plugins or scripts (if supported).
-- **Cross-platform support:** Runs on major operating systems.
+- **KoboToolbox Integration**: 
+  - Connects to the KoboToolbox API to fetch project metadata and form submissions.
+  - Supports configuration of API credentials and polling intervals.
+  - Provides endpoints to test API connection and list available KoboToolbox projects.
 
-## Installation
+- **Real-Time Streaming**:
+  - Submissions from KoboToolbox can be streamed in real-time to an external event streaming service, such as Azure Event Hubs.
+  - Includes a background worker to poll KoboToolbox for new submissions and forward them to the event stream.
+  - Tracks streaming status and logs events and metrics for each transmission.
 
-Clone this repository:
+- **Webhook Handling**:
+  - Accepts POST requests with KoboToolbox data via a webhook endpoint.
+  - Validates, processes, and forwards the data to the event streaming service.
 
-```bash
-git clone https://github.com/haron2soy/KoboBridge.git
-cd KoboBridge
-```
+- **User Authentication**:
+  - User registration and login with password hashing.
+  - Session management and user-specific configuration storage.
+  - Uses Flask-Login for user session handling.
 
-Install dependencies (if applicable):
+- **Monitoring and Health Checks**:
+  - Provides endpoints to check system health, including event stream connectivity and recent errors.
+  - Tracks and reports statistics such as success rates, average processing times, and recent log entries.
 
-```bash
-# Example for Python projects
-pip install -r requirements.txt
-```
+- **Configuration Management**:
+  - Allows users to manage and update EventStream and KoboToolbox API configurations via dedicated endpoints.
+  - Stores configuration both in user sessions and optionally in the database.
 
-Or follow the instructions for your platform/language (see below).
+## Main Components
+
+- `app.py`: Initializes the Flask application, configures logging, sets up extensions (database, login), and loads routes.
+- `routes.py`: Defines the HTTP endpoints for webhooks, user auth, configuration, stats, and streaming controls.
+- `kobo_client.py`: Implements the core logic for connecting to KoboToolbox, polling for projects and submissions, and streaming data to the event stream.
+- `eventstream_client.py`: Handles the connection to the event streaming service, sending data, and reporting metrics and health status.
+- `kobo_clientg.py`: Provides similar functionality to `kobo_client.py`, possibly as an alternative or generic implementation.
+- `models.py`: Defines the database models for users, webhook logs, system health, and event stream metrics.
 
 ## Usage
 
-1. Connect your Kobo device to your computer via USB.
-2. Run KoboBridge:
+The application is intended to be run as a Flask web service. Users interact with the API to configure bridge settings, authenticate, start/stop data streaming, and monitor system health. 
 
-```bash
-# Example for Python projects
-python main.py
-```
+> **Note**: The application contains endpoints and configuration options related to external event streaming platforms and expects a valid KoboToolbox account and credentials for operation.
 
-3. Follow the on-screen instructions to sync, export, or manage your device.
+## Disclaimer
 
-> **Note:** Detailed usage instructions and command-line options can be found in the [Usage Guide](./docs/USAGE.md) (if available).
-
-## Requirements
-
-- Kobo eReader
-- USB cable
-- Python 3.x (if the project is in Python)
-- Additional dependencies as specified in `requirements.txt` or other manifest files
-
-## Contributing
-
-Contributions are welcome! Please open an issue to discuss your ideas or submit a pull request.
-
-1. [Fork this repository](https://github.com/haron2soy/KoboBridge/fork)
-2. Create your feature branch (`git checkout -b feature/YourFeature`)
-3. Commit your changes (`git commit -am 'Add new feature'`)
-4. Push to the branch (`git push origin feature/YourFeature`)
-5. Open a pull request
-
-## License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
-## Acknowledgements
-
-- Kobo eReader community
-- Contributors
-
----
-
-Feel free to customize this README to better fit the specific functionality and setup instructions of your project!
+This documentation is based solely on the source code. If you need further details (such as deployment, environment setup, or advanced usage), refer to in-line code comments or seek additional documentation.
