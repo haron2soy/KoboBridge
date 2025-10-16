@@ -1,0 +1,457 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i data-feather="activity"></i>
+                FlaskStream Dashboard
+            </h1>
+            <div class="d-flex align-items-center">
+                <div class="auto-refresh-indicator me-2">
+                    <i data-feather="refresh-cw"></i>
+                </div>
+                <small class="text-muted">Auto-refreshing every 30s</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Overview -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card metric-card success">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i data-feather="check-circle" class="text-success me-2"></i>
+                    <div>
+                        <h5 class="card-title mb-0" id="total-webhooks">-</h5>
+                        <small class="text-muted">Total Webhooks</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card metric-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i data-feather="trending-up" class="text-primary me-2"></i>
+                    <div>
+                        <h5 class="card-title mb-0" id="success-rate">-%</h5>
+                        <small class="text-muted">Success Rate</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card metric-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i data-feather="clock" class="text-info me-2"></i>
+                    <div>
+                        <h5 class="card-title mb-0" id="avg-processing-time">- ms</h5>
+                        <small class="text-muted">Avg Processing Time</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card metric-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i data-feather="calendar" class="text-warning me-2"></i>
+                    <div>
+                        <h5 class="card-title mb-0" id="today-webhooks">-</h5>
+                        <small class="text-muted">Today's Webhooks</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Health -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="heart"></i>
+                    System Health
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="d-flex align-items-center mb-2">
+                            <i data-feather="database" class="me-2"></i>
+                            <span>Database</span>
+                            <span class="badge ms-auto" id="database-status">-</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i data-feather="send" class="me-2"></i>
+                            <span>EventStream</span>
+                            <span class="badge ms-auto" id="eventstream-status">-</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-outline-primary btn-sm w-100" id="test-eventstream">
+                            <i data-feather="send"></i>
+                            Test EventStream
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="bar-chart-2"></i>
+                    EventStream Metrics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h6 id="eventstream-success-rate">-%</h6>
+                        <small class="text-muted">Success Rate</small>
+                    </div>
+                    <div class="col-6">
+                        <h6 id="eventstream-avg-time">- ms</h6>
+                        <small class="text-muted">Avg Transmission</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i data-feather="list"></i>
+                        Recent Webhook Activity
+                    </h5>
+                    <button class="btn btn-outline-secondary btn-sm" id="refresh-logs">
+                        <i data-feather="refresh-cw"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="recent-logs">
+                    <div class="text-center text-muted">
+                        <i data-feather="loader" class="spinning"></i>
+                        Loading recent activity...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="database"></i>
+                    Latest Data Sent to Power BI
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="latest-data-table">
+                    <div class="text-center text-muted">
+                        <i data-feather="loader" class="spinning"></i>
+                        Loading data...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Register Modal -->
+<div class="modal fade" id="registerModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content p-3">
+      <h5>Register</h5>
+      <input type="text" id="register-username" class="form-control mb-2" placeholder="Username">
+      <input type="password" id="register-password" class="form-control mb-2" placeholder="Password">
+      <button class="btn btn-primary" id="register-btn" >Register</button>
+    </div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content p-3">
+      <h5>Login</h5>
+      <input type="text" id="login-username" class="form-control mb-2" placeholder="Username">
+      <input type="password" id="login-password" class="form-control mb-2" placeholder="Password">
+      <button class="btn btn-success" id="login-btn" >Login</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Settings Modal -->
+<div class="modal fade" id="settingsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i data-feather="settings"></i>
+                    FlaskStream Configuration
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="webhook-tab" data-bs-toggle="tab" data-bs-target="#webhook-config" type="button" role="tab">
+                                    <i data-feather="link"></i>
+                                    Webhook
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="eventstream-tab" data-bs-toggle="tab" data-bs-target="#eventstream-config" type="button" role="tab">
+                                    <i data-feather="cloud"></i>
+                                    Power BI EventStream
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="kobo-api-tab" data-bs-toggle="tab" data-bs-target="#kobo-api-config" type="button" role="tab">
+                                    <i data-feather="database"></i>
+                                    KoboToolbox API
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="settingsTabContent">
+                    <!-- Webhook Configuration -->
+                    <div class="tab-pane fade show active" id="webhook-config" role="tabpanel">
+                        <div class="mt-3">
+                            <h6>Webhook Configuration</h6>
+                            <form id="webhook-config-form">
+                                <div class="mb-3">
+                                    <label class="form-label">Webhook URL:</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="webhook-url" readonly>
+                                        <button class="btn btn-outline-secondary" type="button" id="copy-webhook-url">
+                                            <i data-feather="copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text">Use this URL in your KoboToolbox form settings.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="verify-signature" checked>
+                                        <label class="form-check-label" for="verify-signature">
+                                            Verify webhook signature
+                                        </label>
+                                    </div>
+                                    <div class="form-text">Enable to verify webhook requests are from KoboToolbox.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="kobo-secret" class="form-label">KoboToolbox Webhook Secret (Optional):</label>
+                                    <input type="password" class="form-control" id="kobo-secret" placeholder="Enter your KoboToolbox webhook secret">
+                                    <div class="form-text">Set this in your KoboToolbox form webhook settings.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="max-payload-size" class="form-label">Max Payload Size (MB):</label>
+                                    <input type="number" class="form-control" id="max-payload-size" value="10" min="1" max="100">
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i data-feather="save"></i>
+                                    Save Webhook Settings
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- EventStream Configuration -->
+                    <div class="tab-pane fade" id="eventstream-config" role="tabpanel">
+                        <div class="mt-3">
+                            <h6>Power BI EventStream Connection</h6>
+                            <form id="eventstream-config-form">
+                                <!--<div class="mb-3">
+                                    <label for="connection-string" class="form-label">EventStream Connection String:</label>
+                                    <textarea class="form-control" id="connection-string" rows="4" placeholder="Endpoint=sb://your-eventhub.servicebus.windows.net/;SharedAccessKeyName=your-key-name;SharedAccessKey=your-key;EntityPath=your-eventstream"></textarea>
+                                    <div class="form-text">Get this from your Power BI EventStream settings under the Event Hub connection option.</div>
+                                </div>-->
+                                    <div class="mb-3">
+                                        <label for="namespace" class="form-label">Namespace:</label>
+                                        <input type="text" class="form-control" id="namespace" placeholder="esehdb Name space">
+                                        <div class="form-text">The Event Hub namespace (without "sb://...").</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="entity-path" class="form-label">Entity Path:</label>
+                                        <input type="text" class="form-control" id="entity-path" placeholder="es_e3dc7a7c entity path">
+                                        <div class="form-text">The Event Hub (EventStream) name.</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="key-name" class="form-label">Shared Access Key Name:</label>
+                                        <input type="text" class="form-control" id="key-name" placeholder="key_7bdb access key name">
+                                        <div class="form-text">The policy name for accessing the Event Hub.</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="key-value" class="form-label">Shared Access Key Value:</label>
+                                        <input type="password" class="form-control" id="key-value" placeholder="7J9kJX Key access key value">
+                                        <div class="form-text">The secret key value (keep this safe).</div>
+                                    </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="max-retries" class="form-label">Max Retries:</label>
+                                        <input type="number" class="form-control" id="max-retries" value="3" min="1" max="10">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="retry-delay" class="form-label">Retry Delay (seconds):</label>
+                                        <input type="number" class="form-control" id="retry-delay" value="1.0" min="0.1" max="60" step="0.1">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="timeout" class="form-label">Timeout (seconds):</label>
+                                        <input type="number" class="form-control" id="timeout" value="30" min="5" max="300">
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i data-feather="save"></i>
+                                        Save EventStream Settings
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success" id="test-connection">
+                                        <i data-feather="send"></i>
+                                        Test Connection
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- KoboToolbox API Configuration -->
+                    <div class="tab-pane fade" id="kobo-api-config" role="tabpanel">
+                        <div class="mt-3">
+                            <h6>KoboToolbox API Configuration</h6>
+                            <form id="kobo-api-config-form">
+                                <div class="mb-3">
+                                    <label for="kobo-server-url" class="form-label">Server URL:</label>
+                                    <select class="form-control" id="kobo-server-url">
+                                        <option value="https://kf.kobotoolbox.org">KoboToolbox (https://kf.kobotoolbox.org)</option>
+                                        <option value="https://kobo.humanitarianresponse.info">Humanitarian Response (https://kobo.humanitarianresponse.info)</option>
+                                        <option value="custom">Custom Server</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3" id="custom-server-div" style="display: none;">
+                                    <label for="kobo-custom-server" class="form-label">Custom Server URL:</label>
+                                    <input type="url" class="form-control" id="kobo-custom-server" placeholder="https://your-kobo-server.com">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="kobo-api-token" class="form-label">API Token:</label>
+                                    <input type="password" class="form-control" id="kobo-api-token" placeholder="Enter your KoboToolbox API token" required>
+                                    <div class="form-text">Get this from your KoboToolbox account settings under API Token.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="kobo-project-id" class="form-label">Project/Form ID:</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="kobo-project-id" placeholder="Enter project/form identifier">
+                                        <button class="btn btn-outline-secondary" type="button" id="load-kobo-projects">
+                                            <i data-feather="refresh-cw"></i>
+                                            Load Projects
+                                        </button>
+                                    </div>
+                                    <div class="form-text">Project identifier from your KoboToolbox form URL or use Load Projects to select.</div>
+                                </div>
+                                
+                                <div class="mb-3" id="kobo-projects-list" style="display: none;">
+                                    <label class="form-label">Available Projects:</label>
+                                    <select class="form-control" id="kobo-projects-select">
+                                        <option value="">Select a project...</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="kobo-polling-interval" class="form-label">Polling Interval (seconds):</label>
+                                        <input type="number" class="form-control" id="kobo-polling-interval" value="30" min="10" max="3600">
+                                        <div class="form-text">How often to check for new submissions.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="kobo-batch-size" class="form-label">Batch Size:</label>
+                                        <input type="number" class="form-control" id="kobo-batch-size" value="50" min="1" max="1000">
+                                        <div class="form-text">Number of submissions to fetch per request.</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i data-feather="save"></i>
+                                        Save KoboToolbox Settings
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success" id="test-kobo-connection">
+                                        <i data-feather="check-circle"></i>
+                                        Test Connection
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <hr class="my-4">
+                            
+                            <h6>Real-time Data Streaming</h6>
+                            <div class="d-flex align-items-center gap-3">
+                                <button type="button" class="btn btn-success" id="start-streaming">
+                                    <i data-feather="play"></i>
+                                    Start Streaming
+                                </button>
+                                <button type="button" class="btn btn-danger" id="stop-streaming" disabled>
+                                    <i data-feather="stop-circle"></i>
+                                    Stop Streaming
+                                </button>
+                                <div id="streaming-status" class="ms-3">
+                                    <span class="badge bg-secondary">Stopped</span>
+                                </div>
+                            </div>
+                            <div class="form-text mt-2">
+                                Start real-time streaming to automatically fetch new KoboToolbox submissions and forward them to Power BI EventStream.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+    <script>
+        const dashboard = new Dashboard();
+    </script>
+
+<script src="{{ url_for('static', filename='kobo_api_methods.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,56 @@
+<!--
+{% extends "base.html" %}
+
+{% block title %}Login - FlaskStream{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-body">
+                <h3 class="card-title mb-4 text-center">
+                    <i data-feather="log-in"></i> Login
+                </h3>
+                <form id="login-form">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i data-feather="log-in"></i> Login
+                    </button>
+                </form>
+                <div class="text-center mt-3">
+                    <small>Don't have an account? <a href="/register">Register here</a></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const res = await fetch("/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            username: document.getElementById("username").value,
+            password: document.getElementById("password").value
+        })
+    });
+    const data = await res.json();
+    if (res.ok) {
+        window.location.href = "/";
+    } else {
+        alert(data.error || "Login failed");
+    }
+});
+</script>
+{% endblock %}
